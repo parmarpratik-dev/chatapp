@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { connectLiveLocations, disconnectLiveLocations } from '../services/liveLocationService';
+import { Rectangle } from 'react-leaflet';
 
-// Fix Leaflet's default marker icon issue with bundlers like Vite
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -12,29 +12,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-export default function MapScreen({ currentUser, currentGeohash }) {
-  const [userPositions, setUserPositions] = useState({}); // { userId: {username, latitude, longitude} }
+export default function MapScreen({ currentUser, currentGeohash, userPositions, zoneBounds }) {
+ 
   const [mapCenter, setMapCenter] = useState(null);
 
-  useEffect(() => {
-
-    if (!currentGeohash) return;
-
-    connectLiveLocations(currentGeohash, (update) => {
-        console.log('Received location update:', update);
-      setUserPositions((prev) => ({
-        ...prev,
-        [update.userId]: update,
-      }));
-
-      // center map on first update we ever receive (usually our own)
-      setMapCenter((prevCenter) =>
-        prevCenter || [update.latitude, update.longitude]
-      );
-    });
-
-    return () => disconnectLiveLocations();
-  }, [currentGeohash]);
+useEffect(() => {
+  if(!mapCenter && Object.keys(userPositions).length > 0) {
+    const firstUser = Object.values(userPositions)[0];
+    setMapCenter([firstUser.latitude, firstUser.longitude]);
+  }
+},[userPositions])
 
   if (!currentGeohash) {
     return (
@@ -63,10 +50,21 @@ export default function MapScreen({ currentUser, currentGeohash }) {
 
       <div className="flex-1">
         <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
-          <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+        {zoneBounds && (
+          <Rectangle 
+          bounds={[
+            [zoneBounds[0], zoneBounds[1]],
+            [zoneBounds[2], zoneBounds[3]]
+          ]}
+          pathOptions={{ color: 'blue', weight: 2, fillOpacity: 0.05}}
           />
+        )}
+
+        <TileLayer
+        attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+      />
 
           {Object.values(userPositions).map((user) => (
             <Marker key={user.userId} position={[user.latitude, user.longitude]}>

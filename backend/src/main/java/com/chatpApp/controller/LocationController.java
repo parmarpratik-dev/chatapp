@@ -18,10 +18,14 @@ public class LocationController {
     public LocationController(LocationService locationService) {
         this.locationService = locationService;
     }
+
     @PutMapping("/location")
     public ResponseEntity<LocationUpdateResponse> updateLocation(@RequestParam Long userId,
                                                                  @RequestBody LocationUpdateRequest request) {
+
+
         LocationUpdateResponse response = locationService.updateLocation(userId, request);
+
         return ResponseEntity.ok(response);
    }
 

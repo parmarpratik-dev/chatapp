@@ -19,4 +19,5 @@ public class GeoUtils {
     public static double getLongitude(Point point) {
         return point.getX();
     }
+
  }

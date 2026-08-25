@@ -5,7 +5,7 @@ import com.chatpApp.dto.LiveLocationUpdate;
 import com.chatpApp.dto.LocationUpdateRequest;
 import com.chatpApp.dto.LocationUpdateResponse;
 import com.chatpApp.dto.UserSearchResponse;
-import com.chatpApp.entity.GeoHashUtil;
+import com.chatpApp.util.GeoHashUtil;
 import com.chatpApp.entity.User;
 import com.chatpApp.repository.UserRepository;
 import com.chatpApp.util.GeoUtils;
@@ -47,8 +47,8 @@ public class LocationService {
         );
 
         simpMessagingTemplate.convertAndSend("/topic/group-" + newGeohash + "-locations", update);
-
-        return new LocationUpdateResponse(newGeohash, "Location updated successfully");
+        double[] boundingBox = GeoHashUtil.getBoundingBox(newGeohash);
+        return new LocationUpdateResponse(newGeohash, "Location updated successfully", boundingBox);
     }
 
     public List<UserSearchResponse> getUsersInZone(String geohash, Long excludeUserId) {

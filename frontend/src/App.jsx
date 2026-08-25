@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ChatScreen from './screens/ChatScreen';
 import FriendsList from './screens/FriendsList';
 import GroupChatScreen from './screens/GroupChatScreen';
@@ -10,15 +10,82 @@ import SearchUsers from './screens/SearchUsers';
 import PendingRequests from './screens/PendingRequests';
 import { getFriends } from './services/friendApi';
 import MapScreen from './screens/MapScreen';
+import { connectLiveLocations, disconnectLiveLocations } from './services/liveLocationService';
+import { fetchGroupHistory } from './services/groupApi';
+import { updateLocation } from './services/locationApi';
+import { getCurrentLocation, watchLocation, clearLocationWatch } from './utils/geoUtils';
+import { connectGroupChat, sendGroupMessage as sendGroupMsg, disconnectGroupChat } from './services/groupWebsocketService';
+
+
 
 function App() {
+  
   const [currentUser, setCurrentUser] = useState(() => {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
   const [currentGeohash, setCurrentGeohash] = useState(null);
+  const [userPositions, setUserPositions] = useState({});
+  const [mapReady, setMapReady] = useState(null);
   const navigate = useNavigate();
+  const [groupMessages, setGroupMessages] = useState([]);
+  const [groupStatus, setGroupStatus] = useState('Getting your location...');
+  const watchIdRef = useRef(null);
+  const lastSyncTimeRef = useRef(0);
+  const isGroupConnectedRef = useRef(false);
+  const currentGeohashRef = useRef(null);
+  const [zoneBounds, setZoneBounds] = useState(null);
+
+  useEffect(() => {
+    if (!currentUser) return;
+  
+    async function handleLocationUpdate({ latitude, longitude }) {
+      const now = Date.now();
+      if (now - lastSyncTimeRef.current < 3000 && currentGeohashRef.current) return;
+      lastSyncTimeRef.current = now;
+  
+      try {
+        const response = await updateLocation(currentUser.id, latitude, longitude);
+        const newGeohash = response.geohash;
+          
+        if (newGeohash !== currentGeohashRef.current) {
+          currentGeohashRef.current = newGeohash;
+          setCurrentGeohash(newGeohash);
+
+          setZoneBounds(response.boundingBox);
+          
+          setGroupStatus('Loading nearby messages...');
+          const history = await fetchGroupHistory(newGeohash);
+          setGroupMessages(history);
+  
+          if (!isGroupConnectedRef.current) {
+            connectGroupChat(newGeohash, (newMsg) => {
+              setGroupMessages((prev) => [...prev, newMsg]);
+            });
+            isGroupConnectedRef.current = true;
+          }
+  
+          setGroupStatus(`Connected to zone: ${newGeohash}`);
+        }
+      } catch (err) {
+        setGroupStatus('Location error: ' + err.message);
+      }
+    }
+  
+    watchIdRef.current = watchLocation(handleLocationUpdate);
+  
+    return () => {
+      clearLocationWatch(watchIdRef.current);
+      disconnectGroupChat();
+    };
+  }, [currentUser]);
+  
+  const handleSendGroupMessage = (content) => {
+    if (!currentGeohash) return;
+    sendGroupMsg(currentGeohash, currentUser.id, content);
+  };
+
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
@@ -32,6 +99,17 @@ function App() {
     navigate('/login');
   };
 
+  useEffect(() => {
+    if(!currentGeohash) return;
+
+    connectLiveLocations(currentGeohash, (update) => {
+      setUserPositions((prev) => ({...prev, [update.userId] : update}));
+      setMapReady(true);
+    })
+
+    return () => disconnectLiveLocations();
+  }, [currentGeohash]);
+
   return (
     <div className="relative min-h-screen bg-gray-950">
       <Routes>
@@ -39,7 +117,7 @@ function App() {
         path="/map"
         element={
           currentUser ? (
-            <MapScreen currentUser={currentUser} currentGeohash={currentGeohash} />
+            <MapScreen currentUser={currentUser} currentGeohash={currentGeohash} userPositions={userPositions} zoneBounds={zoneBounds} />
           ) : (
             <Navigate to="/login" replace />
           )
@@ -59,7 +137,13 @@ function App() {
                     Logout
                   </button>
                 </div>
-                <GroupChatScreen currentUser={currentUser} onGeohashResolved={setCurrentGeohash} />
+                <GroupChatScreen
+                    currentUser={currentUser}
+                    mapReady={mapReady}
+                    messages={groupMessages}
+                    status={groupStatus}
+                    onSendMessage={handleSendGroupMessage}
+                  />
               </>
             ) : (
               <Navigate to="/login" replace />

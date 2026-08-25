@@ -66,9 +66,9 @@
             <artifactId>hibernate-spatial</artifactId>
         </dependency>
 		<dependency>
-			<groupId>ch.hsr</groupId>
-			<artifactId>geohash</artifactId>
-			<version>1.4.0</version>
+			<groupId>com.github.davidmoten</groupId>
+			<artifactId>geo</artifactId>
+			<version>0.8.0</version>
 		</dependency>
 	</dependencies>
 
