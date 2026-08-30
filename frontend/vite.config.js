@@ -14,6 +14,7 @@ export default defineConfig({
         target: 'http://localhost:8080',
         ws: true,
       },
+      '/uploads': 'http://localhost:8080',
     },
     allowedHosts: ['mongoose-velcro-ogle.ngrok-free.dev']
   },

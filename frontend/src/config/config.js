@@ -7,5 +7,10 @@
 
 
 
-export const WS_URL = `${window.location.origin}/ws`;
-export const API_URL = `${window.location.origin}/api`;
+export const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+export const WS_URL = import.meta.env.VITE_WS_URL || `${window.location.origin}/ws`;
+
+// BASE_URL is the root backend URL (stripped of /api) to load dynamic media files
+export const BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/api$/, "")
+  : `${window.location.origin}`;

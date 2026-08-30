@@ -25,6 +25,12 @@ public class Message {
     @Column(nullable = false, length = 1000)
     private String content;
 
+    @Column(nullable = true)
+    private String messageType = "TEXT";
+
+    @Column(nullable = true)
+    private String audioUrl;
+
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
@@ -35,5 +41,4 @@ public class Message {
 
     @Column(nullable = false)
     private boolean isDelete = false;
-
 }

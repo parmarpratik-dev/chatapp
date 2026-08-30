@@ -10,8 +10,16 @@ import com.chatpApp.repository.MessageRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
     @Service
@@ -30,7 +38,7 @@ import java.util.stream.Collectors;
         }
 
         public MessageResponse saveMessage(MessageRequest request) {
-            if(!friendRequestRepository.areFriends(request.getSenderId(), request.getReceiverId())) {
+            if (!friendRequestRepository.areFriends(request.getSenderId(), request.getReceiverId())) {
                 throw new BadRequestException("You can only message friends");
             }
 
@@ -38,6 +46,8 @@ import java.util.stream.Collectors;
             message.setSenderId(request.getSenderId());
             message.setReceiverId(request.getReceiverId());
             message.setContent(request.getContent());
+            message.setMessageType(request.getMessageType() != null ? request.getMessageType() : "TEXT");
+            message.setAudioUrl(request.getAudioUrl());
             message.setTimestamp(java.time.LocalDateTime.now());
 
             Message saved = messageRepository.save(message);
@@ -54,12 +64,12 @@ import java.util.stream.Collectors;
 
 
         public void deleteMessage(Long id) {
-                   Message message = messageRepository.findById(id)
-                           .orElseThrow(() -> new UsernameNotFoundException("Message not found"));
+            Message message = messageRepository.findById(id)
+                    .orElseThrow(() -> new UsernameNotFoundException("Message not found"));
 
-                    message.setDelete(true);
-                    Message saved = messageRepository.save(message);
-                    MessageResponse response = toResponse(saved);
+            message.setDelete(true);
+            Message saved = messageRepository.save(message);
+            MessageResponse response = toResponse(saved);
 
             messagingTemplate.convertAndSend("/queue/messages-" + saved.getSenderId() + "-deleted", response);
             messagingTemplate.convertAndSend("/queue/messages-" + saved.getReceiverId() + "-deleted", response);
@@ -69,7 +79,7 @@ import java.util.stream.Collectors;
             Message message = messageRepository.findById(id).
                     orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-            if(!request.getSenderId().equals(message.getSenderId())) {
+            if (!request.getSenderId().equals(message.getSenderId())) {
                 throw new BadRequestException("You can not edit your own message");
             }
 
@@ -82,14 +92,35 @@ import java.util.stream.Collectors;
             return response;
         }
 
-        public MessageResponse toResponse(Message message) {
-            return new MessageResponse(
-                    message.getId(),
-                    message.getSenderId(),
-                    message.getReceiverId(),
-                    message.getContent(),
-                    message.isDelete(),
-                    message.getTimestamp());
+        public String saveAudioFile(MultipartFile file) {
+            try {
+                String folder = "uploads/audio-messages";
+                Files.createDirectories(Paths.get(folder));
+
+                // Fix 1: Added folder separator and cleaned filename
+                String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                Path filePath = Paths.get(folder, filename);
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Fix 2: Ensure correct leading slash for frontend consumption
+                return "/uploads/audio-messages/" + filename;
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save audio file", e);
+            }
         }
 
+        public MessageResponse toResponse(Message message) {
+
+
+            return MessageResponse.builder()
+                    .id(message.getId())
+                    .senderId(message.getSenderId())
+                    .receiverId(message.getReceiverId())
+                    .content(message.getContent())
+                    .isDeleted(message.isDelete())
+                    .messageType(message.getMessageType())
+                    .audioUrl(message.getAudioUrl())
+                    .timestamp(message.getTimestamp())
+                    .build();
+        }
     }

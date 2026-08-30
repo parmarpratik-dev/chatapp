@@ -34,14 +34,14 @@ export function connectWebSocket(userId, onMessageReceived, onMessageDeleted, on
   stompClient.activate();
 }
 
-export function sendMessage(senderId, receiverId, content) {
+export function sendMessage(senderId, receiverId, content, messageType = 'TEXT', audioUrl = null) {
   if (!stompClient || !stompClient.connected) {
     console.warn('Cannot send — not connected');
     return;
   }
   stompClient.publish({
     destination: '/app/chat.send',
-    body: JSON.stringify({ senderId, receiverId, content }),
+    body: JSON.stringify({ senderId, receiverId, content, messageType, audioUrl }),
   });
 }
 

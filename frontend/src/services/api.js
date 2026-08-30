@@ -8,7 +8,6 @@ export const fetchConversation = async (user1, user2) => {
 }
 
 
-
 export const deleteMessage = async (id) => {
     const response = await axiosInstance.put(`/messages/${id}`);
 
@@ -18,9 +17,6 @@ export const deleteMessage = async (id) => {
 
     return response.data;
 };
-
-
-
 
 
 export const editMessage = async (id, senderId, receiverId, content) => {
@@ -35,3 +31,24 @@ export const editMessage = async (id, senderId, receiverId, content) => {
 
     return response.data;
 };
+
+
+export const uploadAudio = async (audioBlob) => {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'voice-message.webm');
+
+    const response = await axiosInstance.post(
+        `/messages/upload-audio`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }
+    );
+
+    // if (response.status !== 200) {
+    //     throw new Error("Failed to upload audio");
+    // }
+    return response.data;
+}

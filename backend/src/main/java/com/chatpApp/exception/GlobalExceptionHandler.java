@@ -36,6 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+        ex.printStackTrace(); // Fixed: prints the stack trace to your terminal/console
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR.value(), LocalDateTime.now()));

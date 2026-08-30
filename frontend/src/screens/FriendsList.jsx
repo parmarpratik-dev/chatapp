@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import  { useNavigate } from "react-router-dom";
 import { searchUsers, sendFriendRequest, getFriends } from '../services/friendApi';
+import { BASE_URL } from '../config/config';
 
 export default function FriendsList ({ currentUser }){
     const [friends, setFriends] = useState([]);
@@ -29,7 +30,7 @@ export default function FriendsList ({ currentUser }){
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-white tracking-tight">{currentUser.username}</h2>
               <img
-                    src={`http://localhost:8080/${currentUser.profileImage}`}
+                    src={`${BASE_URL}/${currentUser.profileImage}`}
                     alt={currentUser.profileImage}
                     className="w-10 h-10 rounded-full object-cover"
                   />
@@ -85,7 +86,7 @@ export default function FriendsList ({ currentUser }){
                 <div className="flex items-center gap-3">
 
                   <img
-                    src={`http://localhost:8080/${friendImage}`}
+                    src={`${BASE_URL}/${friendImage}`}
                     alt={friendName}
                     className="w-10 h-10 rounded-full object-cover"
                   />

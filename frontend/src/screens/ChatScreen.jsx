@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { connectWebSocket, sendMessage, disconnectWebSocket } from '../services/websocketService';
 import { fetchConversation, deleteMessage, editMessage } from '../services/api';
 import { Link } from "react-router-dom";
+import { startRecording, stopRecording} from "../utils/audioRecorder";
+import { uploadAudio } from "../services/api";
+import { API_URL } from '../config/config';
 
 export default function ChatScreen({ myUserId, receiverId, receiverName }) {
   
@@ -11,15 +14,41 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
   const [connected, setConnected] = useState(false);
   const [activeMenuMessageId, setActiveMenuMessageId] = useState(null);
   const [editingMessageId, setEditingMessageId] = useState(null);
-
+  const [isRecording, setIsRecording] = useState(false);
   const bottomRef = useRef(null);
   const menuRef = useRef(null);
+
+
+  const handleStartRecording = async () => {
+    try {
+        await startRecording();
+        setIsRecording(true);
+    } catch (err) {
+      console.error('Microphone acess denied', err);
+    }
+  }
+
+  
+
+  const handleStopRecording = async () => {
+
+    setIsRecording(false);
+    const audioBlob = await stopRecording();
+
+    try {
+        const { audioUrl } = await uploadAudio(audioBlob);
+        console.log(audioUrl,"audio")
+        sendMessage(myUserId, receiverId, '', 'AUDIO', audioUrl);    
+    } catch (err) {
+      console.error('Failed to send voice message:',err);
+    }
+  }
 
   useEffect(() => {
     fetchConversation(myUserId, receiverId)
       .then((history) => setMessages(history))
       .catch((err) => console.error(err));
-
+      console.log(isRecording,"isRecording")
     connectWebSocket(
       myUserId,
       (newMessage) => {
@@ -101,7 +130,7 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
   const handleEditClick = (msg) => {
     setActiveMenuMessageId(null);
     setEditingMessageId(msg.id);
-    setInput(msg.content); // pre-fill input with existing content
+    setInput(msg.content);
   };
 
   const handleCancelEdit = () => {
@@ -144,7 +173,13 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
                       isMe ? "bg-blue-600 text-white rounded-tr-xs shadow-md" : "bg-gray-800 text-gray-100 rounded-tl-xs border border-gray-750"
                     }`}
                   >
-                    {msg.content}
+                    {msg.messageType === 'AUDIO' ? (
+                      <audio controls src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="max-w-full" />
+                      
+                    ) : (
+                      msg.content
+                    )}
+                    {/* console.log('Audio src:', `${API_URL.replace('/api', '')}${msg.audioUrl}`); */}
                     {isMe && (
                       <button
                         onClick={() => setActiveMenuMessageId(isMenuOpen ? null : msg.id)}
@@ -203,6 +238,13 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
             className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 transition shadow-sm cursor-pointer"
           >
             {editingMessageId ? "Update" : "Send"}
+          </button>
+
+          <button onClick={isRecording ? handleStopRecording : handleStartRecording}
+          className={`pratiktn px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
+            isRecording ? 'bg-red-600 text-white' : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+          }`}>
+            {isRecording ? '⏹ Stop' : '🎤'}
           </button>
         </div>
 
