@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import {sendGroupMessage } from '../services/groupWebsocketService';
+
 
 export default function GroupChatScreen({ currentUser, mapReady, messages, status, onSendMessage }) {
  
@@ -29,7 +29,26 @@ export default function GroupChatScreen({ currentUser, mapReady, messages, statu
             <Link to="/map" className="text-xs px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700">Map</Link>
           ) : (
             <span className="text-xs px-3 py-1.5 rounded-lg bg-gray-800 text-gray-500 cursor-not-allowed">
-            Loading map...
+            map
+            <svg
+             className="w-5 h-5 animate-spin"
+             viewBox="0 0 24 24"
+             fill="none"
+           >
+             <circle
+               className="opacity-25"
+               cx="12"
+               cy="12"
+               r="10"
+               stroke="currentColor"
+               strokeWidth="4"
+             />
+             <path
+               className="opacity-75"
+               fill="currentColor"
+               d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+             />
+           </svg>
           </span>
           )
           }

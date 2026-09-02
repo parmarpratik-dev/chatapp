@@ -27,9 +27,9 @@ public class AuthController {
             @Valid @ModelAttribute RegisterRequest request,
             @RequestParam(value = "image", required = false) MultipartFile image) {
         request.setImage(image);
-        System.out.print("resigterbody::"+request);
+
         RegisterResponse registerResponse = userService.register(request);
-        System.out.print("resigsterresponse::"+ registerResponse);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
     }
 
@@ -43,6 +43,12 @@ public class AuthController {
     @GetMapping("/search")
     public List<UserSearchResponse> search(@RequestParam String username) {
         return userService.searchUsers(username);
+    }
+
+    @PostMapping("/guest")
+    public ResponseEntity<GuestLoginResponse> guestLogin(@RequestBody GuestLoginRequest request) {
+        GuestLoginResponse response = userService.guestLogin(request);
+        return ResponseEntity.ok(response);
     }
 
 }

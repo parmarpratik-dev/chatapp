@@ -107,5 +107,16 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public GuestLoginResponse guestLogin(GuestLoginRequest request) {
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setIsGuest(true);
 
+        User saved = userRepository.save(user);
+        return GuestLoginResponse.builder()
+                .id(saved.getId())
+                .username(saved.getUsername())
+                .build();
+    }
 }

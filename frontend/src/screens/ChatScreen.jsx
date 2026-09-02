@@ -48,7 +48,7 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
     fetchConversation(myUserId, receiverId)
       .then((history) => setMessages(history))
       .catch((err) => console.error(err));
-      console.log(isRecording,"isRecording")
+      
     connectWebSocket(
       myUserId,
       (newMessage) => {

@@ -15,7 +15,7 @@ import { fetchGroupHistory } from './services/groupApi';
 import { updateLocation } from './services/locationApi';
 import { getCurrentLocation, watchLocation, clearLocationWatch } from './utils/geoUtils';
 import { connectGroupChat, sendGroupMessage as sendGroupMsg, disconnectGroupChat } from './services/groupWebsocketService';
-
+import { GuestLogin } from "./components/GuestLogin";
 
 
 function App() {
@@ -222,6 +222,18 @@ function App() {
             )
           }
         />
+
+      {/* Login as Guest Route */}
+      <Route
+        path="/guest"
+        element={
+          currentUser ? (
+            <Navigate to="/" replace />
+          ) : (
+            <GuestLogin onLoginSuccess={handleLoginSuccess} />
+          )
+        }
+      />
 
         {/* Register Route */}
         <Route

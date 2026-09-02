@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import  { useNavigate } from "react-router-dom";
-import { searchUsers, sendFriendRequest, getFriends } from '../services/friendApi';
+import { getFriends } from '../services/friendApi';
 import { BASE_URL } from '../config/config';
+import {Link} from "react-router-dom";
+
 
 export default function FriendsList ({ currentUser }){
     const [friends, setFriends] = useState([]);
@@ -24,16 +26,19 @@ export default function FriendsList ({ currentUser }){
       <div className="flex justify-center items-center min-h-screen bg-[#030712] p-6">
         
         <div className="w-full max-w-xl h-[600px] bg-[#0b1329] border border-[#1d293d] rounded-2xl p-6 shadow-2xl text-gray-100 font-sans flex flex-col justify-between">
-          
           <div>
+          <Link className="text-gray-400 hover:text-white text-sm font-medium transition cursor-pointer" to="/">← Back</Link>
             
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-white tracking-tight">{currentUser.username}</h2>
+
+              {currentUser?.profileImage && (
               <img
                     src={`${BASE_URL}/${currentUser.profileImage}`}
                     alt={currentUser.profileImage}
                     className="w-10 h-10 rounded-full object-cover"
                   />
+                  )}
               <button
                 onClick={() => navigate('/search')}
                 className="px-4 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 transition text-white cursor-pointer"

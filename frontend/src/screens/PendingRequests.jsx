@@ -39,7 +39,7 @@ return (
         {/* Header Row */}
         <div className="flex items-center gap-3 mb-6">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/friends')}
             className="text-gray-400 hover:text-white text-sm font-medium transition cursor-pointer"
           >
             ← Back

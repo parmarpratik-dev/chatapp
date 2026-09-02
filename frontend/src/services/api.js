@@ -47,8 +47,5 @@ export const uploadAudio = async (audioBlob) => {
         }
     );
 
-    // if (response.status !== 200) {
-    //     throw new Error("Failed to upload audio");
-    // }
     return response.data;
 }

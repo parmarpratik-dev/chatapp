@@ -47,4 +47,8 @@ public class User {
     @Column(nullable = true)
     private String imgUrl;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isGuest = false;
+
 }
