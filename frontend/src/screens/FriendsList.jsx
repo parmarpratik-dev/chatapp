@@ -17,7 +17,7 @@ export default function FriendsList ({ currentUser }){
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
     },[currentUser.id])
-
+console.log(friends,"frd")
     const openChat = (friendId) => {
         navigate(`/chat?receiverId=${friendId}`);
     }
@@ -34,11 +34,11 @@ export default function FriendsList ({ currentUser }){
 
               {currentUser?.profileImage && (
               <img
-                    src={`${BASE_URL}/${currentUser.profileImage}`}
-                    alt={currentUser.profileImage}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  )}
+                src={`${BASE_URL}/${currentUser.profileImage}`}
+                alt={currentUser.profileImage}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            )}  
               <button
                 onClick={() => navigate('/search')}
                 className="px-4 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 transition text-white cursor-pointer"
@@ -89,13 +89,19 @@ export default function FriendsList ({ currentUser }){
                 className="text-left px-4 py-3 rounded-xl bg-[#131d36] border border-[#1d293d] hover:bg-[#1a2747] transition text-sm font-medium text-gray-200 cursor-pointer"
               >
                 <div className="flex items-center gap-3">
+                  
 
-                  <img
+                  {friendImage ? (
+                    <img
                     src={`${BASE_URL}/${friendImage}`}
                     alt={friendName}
                     className="w-10 h-10 rounded-full object-cover"
                   />
-
+                  ) : ( 
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                    {friendName?.charAt(0).toUpperCase()}
+                  </div>
+                )}
                   <span>{friendName}</span>
 
                 </div>

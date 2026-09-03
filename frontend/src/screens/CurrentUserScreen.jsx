@@ -4,7 +4,7 @@ import { getZoneUsers } from '../services/locationApi';
 import { BASE_URL } from '../config/config';
 
 export default function CurrentUsersScreen({ currentUser, currentGeohash }) {
-console.log(currentUser.profileImage)
+
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -62,14 +62,14 @@ console.log(currentUser.profileImage)
                   <div className="flex items-center gap-3">
                     
 
-                    {currentUser.profileImage ? 
+                    {user.imgUrl ? 
                     (
-                        <img src={`${BASE_URL}/${currentUser.profileImage}`} alt={currentUser.profileImage} className="w-10 h-10 rounded-full object-cover" />
+                        <img src={`${BASE_URL}/${user.imgUrl}`} alt={user.imgUrl} className="w-10 h-10 rounded-full object-cover" />
                     )
                     : 
                     (
                         <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                      {user.username?.charAt(0).toUpperCase()}
+                      {user.username?.charAt(0).toUppercase()}
                     </div>
                     )
                     }

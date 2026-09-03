@@ -2,6 +2,7 @@ package com.chatpApp.controller;
 
 import com.chatpApp.dto.LocationUpdateRequest;
 import com.chatpApp.dto.LocationUpdateResponse;
+import com.chatpApp.dto.NearByUserResponse;
 import com.chatpApp.dto.UserSearchResponse;
 import com.chatpApp.service.LocationService;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class LocationController {
    }
 
    @GetMapping("/zone-users")
-   public List<UserSearchResponse> getZoneUsers(@RequestParam String geohash, @RequestParam Long userId) {
+   public List<NearByUserResponse> getZoneUsers(@RequestParam String geohash, @RequestParam Long userId) {
         return locationService.getUsersInZone(geohash, userId);
    }
 }

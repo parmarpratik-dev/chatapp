@@ -1,10 +1,7 @@
 package com.chatpApp.service;
 
 
-import com.chatpApp.dto.LiveLocationUpdate;
-import com.chatpApp.dto.LocationUpdateRequest;
-import com.chatpApp.dto.LocationUpdateResponse;
-import com.chatpApp.dto.UserSearchResponse;
+import com.chatpApp.dto.*;
 import com.chatpApp.util.GeoHashUtil;
 import com.chatpApp.entity.User;
 import com.chatpApp.repository.UserRepository;
@@ -51,10 +48,10 @@ public class LocationService {
         return new LocationUpdateResponse(newGeohash, "Location updated successfully", boundingBox);
     }
 
-    public List<UserSearchResponse> getUsersInZone(String geohash, Long excludeUserId) {
+    public List<NearByUserResponse> getUsersInZone(String geohash, Long excludeUserId) {
         return userRepository.findByCurrentGeohash(geohash)
                 .stream()
-                .map(u -> new UserSearchResponse(u.getId(), u.getUsername()))
+                .map(u -> new NearByUserResponse(u.getId(), u.getUsername(), u.getImgUrl()))
                 .collect(Collectors.toList());
     }
 }

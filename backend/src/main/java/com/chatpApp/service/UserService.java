@@ -35,7 +35,7 @@ public class UserService {
     }
 
     public RegisterResponse register(RegisterRequest request) {
-        System.out.print("userIN::::");
+
         String imageUrl = resolveImageUrl(request);
 
         User user = User.builder()
@@ -48,7 +48,7 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
-        System.out.print("upreturn::::");
+
         return RegisterResponse.builder()
                 .id(savedUser.getId())
                 .username(savedUser.getUsername())

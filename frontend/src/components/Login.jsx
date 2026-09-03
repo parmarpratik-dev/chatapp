@@ -21,6 +21,7 @@ const Login = ({ onLoginSuccess }) => {
       onLoginSuccess(data);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Login Failed');
+      setLoading(false);
     }
   };
 
