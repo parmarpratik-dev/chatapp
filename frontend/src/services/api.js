@@ -49,3 +49,13 @@ export const uploadAudio = async (audioBlob) => {
 
     return response.data;
 }
+
+export const uploadMedia = async (file) => {
+    const formData = new FormData();
+    formData.append('media', file);
+
+    const response = await axiosInstance.post('/messages/upload-media', formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+    })
+    return response.data;
+}

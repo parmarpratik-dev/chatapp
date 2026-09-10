@@ -34,7 +34,7 @@ export function subscribeToGroup(geohash, onGroupMessageReceived) {
 }
 
 export function sendGroupMessage(geohash, senderId, content) {
-    console.log(geohash, senderId, content);
+    
   if (!groupStompClient || !groupStompClient.connected) {
     console.warn('Cannot send — not connected to group chat');
     return;

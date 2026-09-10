@@ -20,6 +20,5 @@ public class MessageResponse {
     private LocalDateTime timestamp;
     private String messageType;
     private String audioUrl;
-
-
+    private String imageUrl;
 }

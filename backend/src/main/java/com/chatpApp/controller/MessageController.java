@@ -3,19 +3,18 @@ package com.chatpApp.controller;
 
 import com.chatpApp.dto.MessageRequest;
 import com.chatpApp.dto.MessageResponse;
-import com.chatpApp.entity.Message;
+
 import com.chatpApp.service.MessageService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/messages")
+    @RequestMapping("/api/messages")
 public class MessageController {
 
     private final MessageService messageService;
@@ -41,15 +40,9 @@ public class MessageController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/upload-audio", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> uploadAudio(@RequestParam("audio") MultipartFile audio) {
-        String audioUrl = messageService.saveAudioFile(audio);
-        return ResponseEntity.ok(Map.of("audioUrl", audioUrl));
-    }
-
-
-    @GetMapping("/debug-path")
-    public String debugPath() {
-        return "Working directory: " + System.getProperty("user.dir");
+    @PostMapping(value = "/upload-media", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadMedia(@RequestParam("media") MultipartFile media) {
+        String mediaUrl = messageService.saveMediaFile(media);
+        return ResponseEntity.ok(Map.of("mediaUrl", mediaUrl));
     }
 }

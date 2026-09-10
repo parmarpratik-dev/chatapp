@@ -69,7 +69,7 @@ export default function CurrentUsersScreen({ currentUser, currentGeohash }) {
                     : 
                     (
                         <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                      {user.username?.charAt(0).toUppercase()}
+                      {user.username?.charAt(0).toUpperCase()}
                     </div>
                     )
                     }

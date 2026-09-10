@@ -9,6 +9,7 @@ export default function GroupChatScreen({ currentUser, mapReady, messages, statu
   const bottomRef = useRef(null);
   
   useEffect(() => {
+    console.log("runuseeff")
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 

@@ -51,7 +51,5 @@ public class User {
     @Builder.Default
     private Boolean isGuest = false;
 
-//    @Column(nullable = true)
-//    private double distanceInMeters;
 
 }

@@ -77,7 +77,6 @@ public class UserService {
             return "uploads/product-images/" + filename;
 
         } catch(IOException e) {
-            e.printStackTrace();
             throw new RuntimeException("Fail to save to the product image", e);
         }
     }

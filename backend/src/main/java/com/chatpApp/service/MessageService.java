@@ -38,15 +38,18 @@ import java.util.stream.Collectors;
         }
 
         public MessageResponse saveMessage(MessageRequest request) {
+
             if (!friendRequestRepository.areFriends(request.getSenderId(), request.getReceiverId())) {
                 throw new BadRequestException("You can only message friends");
             }
+
 
             Message message = new Message();
             message.setSenderId(request.getSenderId());
             message.setReceiverId(request.getReceiverId());
             message.setContent(request.getContent());
             message.setMessageType(request.getMessageType() != null ? request.getMessageType() : "TEXT");
+
             message.setAudioUrl(request.getAudioUrl());
             message.setTimestamp(java.time.LocalDateTime.now());
 
@@ -54,6 +57,8 @@ import java.util.stream.Collectors;
 
             return toResponse(saved);
         }
+
+
 
         public List<MessageResponse> getConversation(Long user1, Long user2) {
             return messageRepository.findConversation(user1, user2)
@@ -92,26 +97,22 @@ import java.util.stream.Collectors;
             return response;
         }
 
-        public String saveAudioFile(MultipartFile file) {
+        public String saveMediaFile(MultipartFile file) {
             try {
-                String folder = "uploads/audio-messages";
+                String folder = "uploads/chat-media/";
                 Files.createDirectories(Paths.get(folder));
 
-                // Fix 1: Added folder separator and cleaned filename
                 String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 Path filePath = Paths.get(folder, filename);
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // Fix 2: Ensure correct leading slash for frontend consumption
-                return "/uploads/audio-messages/" + filename;
+                return "/uploads/chat-media/" + filename;
             } catch (IOException e) {
                 throw new RuntimeException("Failed to save audio file", e);
             }
         }
 
         public MessageResponse toResponse(Message message) {
-
-
             return MessageResponse.builder()
                     .id(message.getId())
                     .senderId(message.getSenderId())
@@ -120,6 +121,7 @@ import java.util.stream.Collectors;
                     .isDeleted(message.isDelete())
                     .messageType(message.getMessageType())
                     .audioUrl(message.getAudioUrl())
+                    .imageUrl(message.getImageUrl())
                     .timestamp(message.getTimestamp())
                     .build();
         }

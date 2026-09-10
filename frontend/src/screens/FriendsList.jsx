@@ -17,7 +17,7 @@ export default function FriendsList ({ currentUser }){
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
     },[currentUser.id])
-console.log(friends,"frd")
+
     const openChat = (friendId) => {
         navigate(`/chat?receiverId=${friendId}`);
     }

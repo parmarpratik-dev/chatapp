@@ -61,7 +61,14 @@ function App() {
   
           if (!isGroupConnectedRef.current) {
             connectGroupChat(newGeohash, (newMsg) => {
-              setGroupMessages((prev) => [...prev, newMsg]);
+              console.log("Received group message:", newMsg);
+              if(newMsg.type === "MESSAGE_DELETED") {
+                setGroupMessages((prev) => 
+                  prev.filter(msg => msg.id !== newMsg.messageId)
+                );
+                return;
+              }
+               setGroupMessages((prev) => [...prev, newMsg]);
             });
             isGroupConnectedRef.current = true;
           }

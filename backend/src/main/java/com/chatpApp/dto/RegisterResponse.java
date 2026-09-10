@@ -13,13 +13,11 @@
     @Builder
     @ToString
     public class RegisterResponse {
-
         private Long id;
         private String username;
         private String email;
         private LocalDate dob;
         private Gender gender;
         private String imageUrl;
-
     }
 

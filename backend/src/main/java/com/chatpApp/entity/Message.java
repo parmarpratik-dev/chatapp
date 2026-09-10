@@ -31,6 +31,9 @@ public class Message {
     @Column(nullable = true)
     private String audioUrl;
 
+    @Column(nullable = true)
+    private String imageUrl;
+
     @Column(nullable = false)
     private LocalDateTime timestamp;
 

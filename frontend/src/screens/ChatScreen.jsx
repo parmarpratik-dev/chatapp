@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connectWebSocket, sendMessage, disconnectWebSocket } from '../services/websocketService';
-import { fetchConversation, deleteMessage, editMessage } from '../services/api';
+import { fetchConversation, deleteMessage, editMessage, uploadMedia } from '../services/api';
 import { Link } from "react-router-dom";
 import { startRecording, stopRecording} from "../utils/audioRecorder";
 import { uploadAudio } from "../services/api";
@@ -17,6 +17,8 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
   const [isRecording, setIsRecording] = useState(false);
   const bottomRef = useRef(null);
   const menuRef = useRef(null);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const fileInputRef = useRef(null);
 
 
   const handleStartRecording = async () => {
@@ -37,7 +39,6 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
 
     try {
         const { audioUrl } = await uploadAudio(audioBlob);
-        console.log(audioUrl,"audio")
         sendMessage(myUserId, receiverId, '', 'AUDIO', audioUrl);    
     } catch (err) {
       console.error('Failed to send voice message:',err);
@@ -93,7 +94,7 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
     if (!input.trim()) return;
 
     if (editingMessageId) {
-      // EDIT MODE
+      
       editMessage(editingMessageId, myUserId, receiverId, input.trim())
         .then((updated) => {
           setMessages((prev) =>
@@ -145,6 +146,22 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
       return (now - messageTime) < fiveMinutes;
   }
 
+  const handleFileSelect = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      setShowAttachMenu(false);
+
+      try {
+          const { mediaUrl } = await uploadMedia(file);
+          console.log(mediaUrl,"MM")
+          const isVideo = file.type.startsWith('video/');
+          sendMessage(myUserId, receiverId, '', isVideo ? 'VIDEO' : 'IMAGE', mediaUrl);
+      } catch (err) {
+        console.error('Failed to send media:', err);
+      }
+  }
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-950 p-4 sm:p-6">
       <div className="w-full max-w-xl h-[650px] bg-gray-900 border border-gray-800 rounded-2xl flex flex-col shadow-2xl text-gray-100 font-sans overflow-hidden">
@@ -176,10 +193,14 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
                     {msg.messageType === 'AUDIO' ? (
                       <audio controls src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="max-w-full" />
                       
+                    ) : msg.messageType === 'IMAGE' ? (
+                      <img src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="max-w-full rounded-lg" alt="shared" />
+                    ) : msg.messageType === 'VIDEO' ? (
+                        <video controls src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="max-w-full rounded-lg" />  
                     ) : (
                       msg.content
                     )}
-                    {/* console.log('Audio src:', `${API_URL.replace('/api', '')}${msg.audioUrl}`); */}
+                    
                     {isMe && (
                       <button
                         onClick={() => setActiveMenuMessageId(isMenuOpen ? null : msg.id)}
@@ -241,11 +262,26 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
           </button>
 
           <button onClick={isRecording ? handleStopRecording : handleStartRecording}
-          className={`pratiktn px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
+          className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
             isRecording ? 'bg-red-600 text-white' : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
           }`}>
             {isRecording ? '⏹ Stop' : '🎤'}
           </button>
+
+          <div className="relative">
+            <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="px-4 py-2.5 rounded-xl bg-gray-700 text-gray-200 hover:bg-gray-600 transition cursor-pointer">
+              +
+            </button>
+
+            {showAttachMenu && (
+              <div className="absolute bottom-full mb-2 left-0 bg-gray-800 border border-gray-700 rounded-xl shadow-xl py-1 w-40">
+                  <button onClick={() => fileInputRef.current.click()} className="w-full px-3.5 py-2 text-left text-xs font-medium text-gray-300 hover:bg-gray-700 transition cursor-pointer">
+                  📷 Photo / Video
+                  </button>
+              </div>
+            )}
+            <input type="file" ref={fileInputRef} accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
+          </div>
         </div>
 
       </div>

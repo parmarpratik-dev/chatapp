@@ -39,12 +39,12 @@ export function sendMessage(senderId, receiverId, content, messageType = 'TEXT',
     console.warn('Cannot send — not connected');
     return;
   }
+  
   stompClient.publish({
     destination: '/app/chat.send',
     body: JSON.stringify({ senderId, receiverId, content, messageType, audioUrl }),
   });
 }
-
 
 export function disconnectWebSocket() {
   if (stompClient) {
