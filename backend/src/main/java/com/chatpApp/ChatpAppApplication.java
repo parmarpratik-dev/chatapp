@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @SpringBootApplication
-public class  ChatpAppApplication {
+public class ChatpAppApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ChatpAppApplication.class, args);

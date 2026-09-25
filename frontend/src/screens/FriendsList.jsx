@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import  { useNavigate } from "react-router-dom";
-import { getFriends } from '../services/friendApi';
+import { getFriends, unfollowRequest } from '../services/friendApi';
 import { BASE_URL } from '../config/config';
 import {Link} from "react-router-dom";
 
 
 export default function FriendsList ({ currentUser }){
+  console.log(currentUser.id,"curreid")
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const [confirmTarget, setConfirmTarget] = useState(null);
 
     useEffect(() => {
         getFriends(currentUser.id)
@@ -18,27 +20,51 @@ export default function FriendsList ({ currentUser }){
         .finally(() => setLoading(false));
     },[currentUser.id])
 
+    const handleUnfollow = async (friendId) => {
+      try {
+        await unfollowRequest(currentUser.id, friendId);
+        setFriends((prev) =>
+          prev.filter((f) => {
+            const isSender = f.senderId === currentUser.id;
+            const otherId = isSender ? f.receiverId : f.senderId;
+            return otherId !== friendId;
+          })
+        );
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setConfirmTarget(null);
+      }
+    };
+
     const openChat = (friendId) => {
         navigate(`/chat?receiverId=${friendId}`);
     }
 
     return (
       <div className="flex justify-center items-center min-h-screen bg-[#030712] p-6">
-        
         <div className="w-full max-w-xl h-[600px] bg-[#0b1329] border border-[#1d293d] rounded-2xl p-6 shadow-2xl text-gray-100 font-sans flex flex-col justify-between">
           <div>
-          <Link className="text-gray-400 hover:text-white text-sm font-medium transition cursor-pointer" to="/">← Back</Link>
-            
+            <Link
+              className="text-gray-400 hover:text-white text-sm font-medium transition cursor-pointer"
+              to="/"
+            >
+              ← Back
+            </Link>
+    
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white tracking-tight">{currentUser.username}</h2>
-
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                {currentUser.username}
+              </h2>
+    
               {currentUser?.profileImage && (
-              <img
-                src={`${BASE_URL}/${currentUser.profileImage}`}
-                alt={currentUser.profileImage}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            )}  
+                <img
+                  src={`${BASE_URL}/${currentUser.profileImage}`}
+                  alt={currentUser.username}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              )}
+    
               <button
                 onClick={() => navigate('/search')}
                 className="px-4 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 transition text-white cursor-pointer"
@@ -60,58 +86,80 @@ export default function FriendsList ({ currentUser }){
     
             {/* Empty State */}
             {!loading && friends.length === 0 && (
-              <p className="text-gray-400 text-sm">No friends yet — search to add some!</p>
+              <p className="text-gray-400 text-sm">
+                No friends yet — search to add some!
+              </p>
             )}
     
             {/* Friends List */}
             <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto pr-1">
-            {friends.map((f) => {
-
-            const friendId =
-              f.senderId === currentUser.id
-                ? f.receiverId
-                : f.senderId;
-
-            const friendName =
-              f.senderId === currentUser.id
-                ? f.receiverUsername
-                : f.senderUsername;
-
-            const friendImage =
-              f.senderId === currentUser.id
-                ? f.receiverImageUrl
-                : f.senderImageUrl;
-
-            return (
-              <button
-                key={f.id}
-                onClick={() => openChat(friendId)}
-                className="text-left px-4 py-3 rounded-xl bg-[#131d36] border border-[#1d293d] hover:bg-[#1a2747] transition text-sm font-medium text-gray-200 cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  
-
-                  {friendImage ? (
-                    <img
-                    src={`${BASE_URL}/${friendImage}`}
-                    alt={friendName}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  ) : ( 
-                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                    {friendName?.charAt(0).toUpperCase()}
+              {friends.map((f) => {
+                const isSender = f.senderId === currentUser.id;
+    
+                const friendId = isSender ? f.receiverId : f.senderId;
+                const friendName = isSender ? f.receiverUsername : f.senderUsername;
+                const friendImage = isSender ? f.receiverImageUrl : f.senderImageUrl;
+    
+                return (
+                  <div
+                    key={f.id}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[#131d36] border border-[#1d293d] hover:bg-[#1a2747] transition"
+                  >
+                    {/* Chat button: takes the remaining width */}
+                    <button
+                      onClick={() => openChat(friendId)}
+                      className="flex-1 flex items-center gap-3 text-left text-sm font-medium text-gray-200 cursor-pointer"
+                    >
+                      {friendImage ? (
+                        <img
+                          src={`${BASE_URL}/${friendImage}`}
+                          alt={friendName}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                          {friendName?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span>{friendName}</span>
+                    </button>
+    
+                    {/* Unfollow button: sibling of the chat button, not inside it */}
+                    <button
+                      onClick={() => setConfirmTarget({ friendId, friendName })}
+                      className="px-3 py-1 text-xs rounded-lg bg-red-600 hover:bg-red-700 text-white transition cursor-pointer"
+                    >
+                      Unfollow
+                    </button>
                   </div>
-                )}
-                  <span>{friendName}</span>
-
-                </div>
-              </button>
-            );
-            })}
+                );
+              })}
             </div>
           </div>
-    
         </div>
+        {confirmTarget && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+            <div className="bg-[#131d36] border border-[#1d293d] rounded-xl p-6 w-72 text-center">
+              <p className="text-gray-200 text-sm mb-4">
+                Unfollow <span className="font-semibold">{confirmTarget.friendName}</span>?
+              </p>
+              <div className="flex justify-center gap-3">
+                <button
+                  onClick={() => setConfirmTarget(null)}
+                  className="cursor-pointer px-4 py-2 text-xs rounded-lg bg-[#1a2747] hover:bg-[#233156] text-gray-200 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleUnfollow(confirmTarget.friendId)}
+                  className="cursor-pointer px-4 py-2 text-xs rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
 }

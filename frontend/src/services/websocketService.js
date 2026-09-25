@@ -4,7 +4,7 @@ import { WS_URL } from '../config/config';
 
 let stompClient = null;
 
-export function connectWebSocket(userId, onMessageReceived, onMessageDeleted, onMessageEdited, onConnected) {
+export function connectWebSocket(userId, onMessageReceived, onMessageDeleted, onMessageEdited, onConnected, onFriendUpdate) {
   stompClient = new Client({
     webSocketFactory: () => new SockJS(WS_URL),
     reconnectDelay: 5000,
@@ -12,19 +12,20 @@ export function connectWebSocket(userId, onMessageReceived, onMessageDeleted, on
       console.log('STOMP connected');
 
       stompClient.subscribe(`/queue/messages-${userId}`, (message) => {
-        const body = JSON.parse(message.body);
-        onMessageReceived(body);
+        onMessageReceived(JSON.parse(message.body));
       });
 
       stompClient.subscribe(`/queue/messages-${userId}-deleted`, (message) => {
-        const body = JSON.parse(message.body);
-        onMessageDeleted(body);
+        onMessageDeleted(JSON.parse(message.body));
       });
 
       stompClient.subscribe(`/queue/messages-${userId}-edited`, (message) => {
-        const body = JSON.parse(message.body);
-        onMessageEdited(body);
-      })
+        onMessageEdited(JSON.parse(message.body));
+      });
+
+      stompClient.subscribe(`/queue/friend-updates-${userId}`, (message) => {
+        if (onFriendUpdate) onFriendUpdate(JSON.parse(message.body));
+      });
 
       if (onConnected) onConnected();
     },

@@ -3,6 +3,7 @@ package com.chatpApp.controller;
 
 import com.chatpApp.dto.FriendRequestResponse;
 import com.chatpApp.service.FriendRequestService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -21,6 +22,12 @@ public class FriendRequestController {
     @PostMapping
     public FriendRequestResponse sendRequest(@RequestParam Long senderId, @RequestParam Long receiverId) {
         return friendRequestService.sendRequest(senderId, receiverId);
+    }
+
+    @PatchMapping("/unfollow-request")
+    public ResponseEntity<String> sendUnfollowRequest(@RequestParam Long senderId, @RequestParam Long receiverId) {
+         friendRequestService.sendUnfollowRequest(senderId, receiverId);
+         return ResponseEntity.ok("UNFLLOWED");
     }
 
     @PutMapping("/{requestId}/accept")

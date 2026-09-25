@@ -154,7 +154,6 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
 
       try {
           const { mediaUrl } = await uploadMedia(file);
-          console.log(mediaUrl,"MM")
           const isVideo = file.type.startsWith('video/');
           sendMessage(myUserId, receiverId, '', isVideo ? 'VIDEO' : 'IMAGE', mediaUrl);
       } catch (err) {
@@ -186,17 +185,20 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
                   <div
                     onContextMenu={(e) => { e.preventDefault(); if (isMe) setActiveMenuMessageId(msg.id); }}
                     onDoubleClick={() => { if (isMe) setActiveMenuMessageId(msg.id); }}
-                    className={`relative px-4 py-2.5 rounded-2xl max-w-[75%] break-words text-sm leading-relaxed transition-all duration-200 select-none cursor-pointer ${
-                      isMe ? "bg-blue-600 text-white rounded-tr-xs shadow-md" : "bg-gray-800 text-gray-100 rounded-tl-xs border border-gray-750"
+                    className={`relative rounded-2xl max-w-[75%] break-words text-sm leading-relaxed transition-all duration-200 select-none cursor-pointer ${
+                      msg.messageType === 'IMAGE' || msg.messageType === 'VIDEO'
+                        ? 'p-0 bg-transparent' 
+                        : `px-4 py-2.5 ${isMe ? "bg-blue-600 text-white rounded-tr-xs shadow-md" : "bg-gray-800 text-gray-100 rounded-tl-xs border border-gray-750"}`
                     }`}
                   >
                     {msg.messageType === 'AUDIO' ? (
                       <audio controls src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="max-w-full" />
                       
+                      
                     ) : msg.messageType === 'IMAGE' ? (
-                      <img src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="max-w-full rounded-lg" alt="shared" />
+                      <img src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="w-48 h-48 object-cover rounded-lg" alt="shared" />
                     ) : msg.messageType === 'VIDEO' ? (
-                        <video controls src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="max-w-full rounded-lg" />  
+                      <video controls src={`${API_URL.replace('/api', '')}${msg.audioUrl}`} className="w-48 h-48 object-cover rounded-lg" />  
                     ) : (
                       msg.content
                     )}
@@ -269,19 +271,19 @@ export default function ChatScreen({ myUserId, receiverId, receiverName }) {
           </button>
 
           <div className="relative">
-            <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="px-4 py-2.5 rounded-xl bg-gray-700 text-gray-200 hover:bg-gray-600 transition cursor-pointer">
-              +
-            </button>
+          <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="px-4 py-2.5 rounded-xl bg-gray-700 text-gray-200 hover:bg-gray-600 transition cursor-pointer">
+            +
+          </button>
 
-            {showAttachMenu && (
-              <div className="absolute bottom-full mb-2 left-0 bg-gray-800 border border-gray-700 rounded-xl shadow-xl py-1 w-40">
-                  <button onClick={() => fileInputRef.current.click()} className="w-full px-3.5 py-2 text-left text-xs font-medium text-gray-300 hover:bg-gray-700 transition cursor-pointer">
-                  📷 Photo / Video
-                  </button>
-              </div>
-            )}
-            <input type="file" ref={fileInputRef} accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
-          </div>
+          {showAttachMenu && (
+            <div className="absolute bottom-full mb-2 right-0 bg-gray-800 border border-gray-700 rounded-xl shadow-xl py-1 w-40">
+                <button onClick={() => fileInputRef.current.click()} className="w-full px-3.5 py-2 text-left text-xs font-medium text-gray-300 hover:bg-gray-700 transition cursor-pointer">
+                📷 Photo / Video
+                </button>
+            </div>
+          )}
+          <input type="file" ref={fileInputRef} accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
+        </div>
         </div>
 
       </div>

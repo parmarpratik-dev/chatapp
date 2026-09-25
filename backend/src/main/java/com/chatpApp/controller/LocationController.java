@@ -24,7 +24,6 @@ public class LocationController {
     public ResponseEntity<LocationUpdateResponse> updateLocation(@RequestParam Long userId,
                                                                  @RequestBody LocationUpdateRequest request) {
 
-
         LocationUpdateResponse response = locationService.updateLocation(userId, request);
 
         return ResponseEntity.ok(response);

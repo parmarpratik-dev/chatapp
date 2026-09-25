@@ -11,7 +11,6 @@ export const searchUsers = async (username) => {
 };
 
 export const sendFriendRequest = async (senderId, receiverId) => {
-    console.log(senderId, receiverId);
 
     const response = await axiosInstance.post(
         `/friend-request?senderId=${senderId}&receiverId=${receiverId}`
@@ -19,6 +18,14 @@ export const sendFriendRequest = async (senderId, receiverId) => {
 
     return response.data;
 };
+
+export const unfollowRequest = async (senderId, receiverId) => {
+    const response = await axiosInstance.patch(
+        `/friend-request/unfollow-request?senderId=${senderId}&receiverId=${receiverId}`
+    );
+
+    return response.data;
+}
 
 export const getPendingRequests = async (userId) => {
     const response = await axiosInstance.get(
